@@ -1,0 +1,35 @@
+*{
+  margin: 0%;
+  padding: 0%;
+}
+
+.toolBox{
+  display: flex;
+  position: fixed;
+  right: 0px;
+  top: 0px;
+  width: 15rem;
+  height: 15rem;
+}
+.toolBox .item{
+  width: 80%;
+  height: 5rem;
+}
+.item{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgb(50, 50, 50);
+  border-radius: 8px;
+  transition: 0.1s;
+  color: #fff;
+} 
+
+.react-grid-placeholder {
+  background: rgb(0, 0, 0);
+  opacity: 0.6;
+  transition: 0.2s;
+  user-select: none;
+  z-index: -1;
+  border-radius: 8px;
+}

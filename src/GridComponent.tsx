@@ -1,63 +1,135 @@
-import GridLayout, { Layout } from "react-grid-layout";
-import {contentsLayout, layout} from './data'
+import GridLayout, { ItemCallback, Layout } from "react-grid-layout";
+import { contentsLayout, data, generateLayout, generateNullLayout, getContents, layout } from './data'
 import { useState } from "react";
+import { useToolBoxContext } from "./ToolBoxContext";
+
 
 export const GridComponent = () => {
   const columns = 5
-  const [placeholderPosition, setPlaceholderPosition ] = useState<{
+  const [placeholderPosition, setPlaceholderPosition] = useState<{
     x: number, y: number
   }>()
-  
-  const onLayoutChange = (newLayout: Layout[]) => {
-    //console.log("moved items", newLayout.filter((item: Layout) => item.moved === true))
-  };
 
-  const handleDrag = (layout : Layout[], oldItem: Layout, newItem: Layout) => {
-    if(newItem.isDraggable) {
-      setPlaceholderPosition({
-        x: newItem.x, y: newItem.y
-      })
-      console.log("PlaceHolder")
-    }
-  }
+  const { setCurrentElementId, currentElementId, currentData, setCurrentData, layoutContents, setLayoutContents, setLayoutNullContents } = useToolBoxContext()
 
-  const handleDragStop = (
+  const handleDrag = (
     layout: Layout[],
     oldItem: Layout,
     newItem: Layout,
     placeholder: Layout,
     event: MouseEvent,
-    element: HTMLElement,
+    element: HTMLElement
   ) => {
-    console.log("Layout", layout)
-    console.log("oldItem", oldItem)
-    console.log("newItem", newItem)
-    console.log("placeHolder", placeholder)
-    console.log("event", event)
-    console.log("element", element)
+    element.style.zIndex = "3"
+
+    return
+    if (newItem) {
+      setPlaceholderPosition({
+        x: newItem.x, y: newItem.y
+      })
+    }
+    let filteredArray: Layout[] = []
+    let fixedArray = layoutContents
+    layoutContents.forEach((object1) => {
+      const newItem = layout.filter(object2 => {
+        return object1.i === object2.i && ((object1.x !== object2.x) || (object1.y !== object2.y)) && (placeholder.x === object2.x || placeholder.y === object2.y)
+      })
+      if (!!newItem[0]) {
+        filteredArray.push(newItem[0])
+        // const indexFixed = filteredArray.findIndex((item)=> item.i === newItem[0].i) 
+        // if(indexFixed > -1 ) fixedArray.splice(indexFixed, 1)
+      }
+    });
+
+    // console.log("newLayout", ())
+  };
+
+
+  function getContents(array: typeof data) {
+    return array.filter(item => !!item.position)
+  }
+  function getDifference(layout1: Layout[], layout2: Layout[]): Layout[] {
+    let filteredArray: Layout[] = []
+    layout1.forEach((object1) => {
+      const newItem = layout2.filter(object2 => {
+        return object1.i === object2.i && ((object1.x !== object2.x) || (object1.y !== object2.y))
+      })
+
+      if (!!newItem[0]) {
+        filteredArray.push(newItem[0])
+      }
+    });
+
+    return filteredArray
   }
 
+  const handleOnDrop = (layout: Layout[], item: Layout, _e: Event) => {
+    let newData = currentData
+    const index = newData.findIndex(i => i.id === currentElementId)
+    if (index !== -1) {
+      newData[index].position = `${item.x}-${item.y}`
+    }
+    console.log("get dif", getDifference(layoutContents, layout))
 
+    getDifference(layoutContents, layout).forEach((itemChanged) => {
+      const index = newData.findIndex(i => i.id.toString() === itemChanged.i)
+      if (index !== -1) {
+        newData[index].position = `${itemChanged.x}-${itemChanged.y}`
+      }
+    })
+
+    setCurrentData(newData)
+
+    setLayoutContents(generateLayout(currentData))
+    setLayoutNullContents(generateNullLayout(currentData))
+    setCurrentElementId(-1)
+  }
+
+  const [isDragDrop, setIsDragDrop] = useState(false)
+  const bodyWidth = window.document.body.offsetWidth
+  const LayoutWidthSize = bodyWidth < 900 ? bodyWidth : bodyWidth / 2
+
+  const handleDragStop = (
+    _layout: Layout[],
+    _oldItem: Layout,
+    _newItem: Layout,
+    _placeholder: Layout,
+    _event: MouseEvent,
+    element: HTMLElement
+  ) => {
+    element.style.zIndex = "1"
+  }
 
   return (
     <GridLayout
-      className="layout"
-      layout={layout}
+      layout={layoutContents}
+      style={{
+        width: LayoutWidthSize,
+        position: "relative",
+        marginLeft: LayoutWidthSize / 2,
+        marginTop: "10rem",
+      }}
       cols={columns}
       // compactType={"vertical"}
       compactType={null}
-      autoSize={true}
-      width={window.document.body.offsetWidth}
+      autoSize
+      onDrop={handleOnDrop}
+      width={LayoutWidthSize}
+      isDraggable={!isDragDrop}
       onDrag={handleDrag}
-      isDroppable={true}
-      onLayoutChange={onLayoutChange}
-      // preventCollision
-      // allowOverlap
-      // isBounded
       onDragStop={handleDragStop}
+      isDroppable
+      preventCollision
+    // allowOverlap
+    // isBounded
     >
-      {contentsLayout?.map((item) => (
-        <div className="item" key={item.id.toString()}>
+      {getContents(currentData)?.map((item) => (
+        <div
+          draggable={isDragDrop}
+          className="item"
+          key={item.id.toString()}
+          onDrag={() => setCurrentElementId(item.id)}
+        >
           {item.name}
         </div>
       ))}

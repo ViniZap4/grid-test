@@ -94,11 +94,15 @@ export const GridComponent = () => {
     _oldItem: Layout,
     _newItem: Layout,
     _placeholder: Layout,
-    _event: MouseEvent,
+    event: MouseEvent,
     element: HTMLElement
   ) => {
     element.style.zIndex = "1"
+    console.log("element", element);
+    console.log("event", event);
+    
   }
+
 
   return (
     <GridLayout

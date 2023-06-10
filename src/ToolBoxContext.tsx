@@ -24,14 +24,14 @@ interface IToolBoxContext {
   isOpened: boolean,
   setisOpened: React.Dispatch<React.SetStateAction<boolean>>
   currentElementId: number,
-  setCurrentElementId: React.Dispatch<React.SetStateAction<number>>
-  currentData: typeof data
-
+  setCurrentElementId: React.Dispatch<React.SetStateAction<number>>,
+  currentData: typeof data,
   setCurrentData: React.Dispatch<React.SetStateAction<typeof data>>,
-  layoutContents: Layout[],
 
+  layoutContents: Layout[],
   setLayoutContents: React.Dispatch<React.SetStateAction<Layout[]>>,
-  layoutNullContents: Layout[]
+
+  layoutNullContents: Layout[],
   setLayoutNullContents: React.Dispatch<React.SetStateAction<Layout[]>>,
 }
 

@@ -1,15 +1,27 @@
-import { useToolBoxContext } from "./ToolBoxContext"
+import { useToolBoxContext } from "./ToolBoxContext";
 
 export const ToolControl = () => {
-  const {isOpened,setisOpened} = useToolBoxContext()
+  const {
+   isOpened, setisOpened,
+   isFixed, setIsFixed
+  } = useToolBoxContext();
 
-  return(
-    <div>
-      <button onClick={() => {
-        setisOpened(p=> !p) 
-      }}>
-        {!isOpened? "open": "close"}ToolBox
+  return (
+    <div className="toolControl">
+      <button
+        onClick={() => {
+          setisOpened((p) => !p);
+        }}
+      >
+        {!isOpened ? "open" : "close"}ToolBox
+      </button>
+      <button
+        onClick={() => {
+          setIsFixed((p) => !p);
+        }}
+      >
+        {!isFixed ? "fixed" : "auto adjust"}
       </button>
     </div>
-  )
-} 
+  );
+};

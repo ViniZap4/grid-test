@@ -2,7 +2,7 @@ import { createContext, useContext, useState, useEffect} from 'react'
 import { Layout } from 'react-grid-layout'
 import { generateLayout, generateNullLayout } from './data'
 
-export let data = [
+export const data = [
   { id: 1, position: "1-1", name: "first item" },
   { id: 2, position: "2-1", name: "name 2" },
   { id: 3, position: "1-3", name: "testing contents" },
@@ -23,8 +23,13 @@ export let data = [
 interface IToolBoxContext {
   isOpened: boolean,
   setisOpened: React.Dispatch<React.SetStateAction<boolean>>
+
+  isFixed: boolean,
+  setIsFixed: React.Dispatch<React.SetStateAction<boolean>>
+
   currentElementId: number,
   setCurrentElementId: React.Dispatch<React.SetStateAction<number>>,
+
   currentData: typeof data,
   setCurrentData: React.Dispatch<React.SetStateAction<typeof data>>,
 
@@ -39,9 +44,9 @@ const ToolBoxContext = createContext<IToolBoxContext>({} as IToolBoxContext)
 
 export const ToolBoxContextProvider = (props: React.PropsWithChildren) => {
   const [isOpened, setisOpened] = useState(false)
+  const [isFixed, setIsFixed] = useState(false)
   const [currentElementId, setCurrentElementId] = useState(0)
   const [currentData, setCurrentData] = useState(data)
-
 
   const [layoutContents, setLayoutContents] = useState(generateLayout(currentData))
   const [layoutNullContents,setLayoutNullContents] = useState(generateLayout(currentData))
@@ -56,10 +61,12 @@ export const ToolBoxContextProvider = (props: React.PropsWithChildren) => {
   return (
     <ToolBoxContext.Provider value={{
       isOpened, setisOpened,
+      isFixed, setIsFixed,
       currentElementId, setCurrentElementId,
       currentData, setCurrentData,
       layoutContents, setLayoutContents,
       layoutNullContents, setLayoutNullContents 
+
     }}>
       {props.children}
     </ToolBoxContext.Provider>

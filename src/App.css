@@ -18,6 +18,10 @@
   z-index: 1;
 }
 
+.toolControl{
+  display: flex;
+}
+
 .item{
   display: flex;
   align-items: center;

@@ -10,7 +10,23 @@ export const GridComponent = () => {
     x: number, y: number
   }>()
 
-  const { setCurrentElementId, currentElementId, currentData, setCurrentData, layoutContents, setLayoutContents, setLayoutNullContents } = useToolBoxContext()
+  const {
+    setCurrentElementId, currentElementId, 
+    currentData, setCurrentData, 
+    layoutContents, setLayoutContents, setLayoutNullContents,
+    isFixed 
+  } = useToolBoxContext()
+
+  const hundleDragStart = (
+    _layout: Layout[],
+    _oldItem: Layout,
+    _newItem: Layout,
+    _placeholder: Layout,
+    _event: MouseEvent,
+    element: HTMLElement
+  ) => {
+    element.style.zIndex = "3"
+  }
 
   const handleDrag = (
     layout: Layout[],
@@ -20,21 +36,20 @@ export const GridComponent = () => {
     event: MouseEvent,
     element: HTMLElement
   ) => {
-    element.style.zIndex = "3"
 
-    return
     if (newItem) {
       setPlaceholderPosition({
         x: newItem.x, y: newItem.y
       })
     }
-    let filteredArray: Layout[] = []
+    return
+    const filteredArray: Layout[] = []
     let fixedArray = layoutContents
     layoutContents.forEach((object1) => {
       const newItem = layout.filter(object2 => {
         return object1.i === object2.i && ((object1.x !== object2.x) || (object1.y !== object2.y)) && (placeholder.x === object2.x || placeholder.y === object2.y)
       })
-      if (!!newItem[0]) {
+      if (newItem[0]) {
         filteredArray.push(newItem[0])
         // const indexFixed = filteredArray.findIndex((item)=> item.i === newItem[0].i) 
         // if(indexFixed > -1 ) fixedArray.splice(indexFixed, 1)
@@ -49,13 +64,13 @@ export const GridComponent = () => {
     return array.filter(item => !!item.position)
   }
   function getDifference(layout1: Layout[], layout2: Layout[]): Layout[] {
-    let filteredArray: Layout[] = []
+    const filteredArray: Layout[] = []
     layout1.forEach((object1) => {
       const newItem = layout2.filter(object2 => {
         return object1.i === object2.i && ((object1.x !== object2.x) || (object1.y !== object2.y))
       })
 
-      if (!!newItem[0]) {
+      if (newItem[0]) {
         filteredArray.push(newItem[0])
       }
     });
@@ -64,7 +79,7 @@ export const GridComponent = () => {
   }
 
   const handleOnDrop = (layout: Layout[], item: Layout, _e: Event) => {
-    let newData = currentData
+    const newData = currentData
     const index = newData.findIndex(i => i.id === currentElementId)
     if (index !== -1) {
       newData[index].position = `${item.x}-${item.y}`
@@ -110,7 +125,7 @@ export const GridComponent = () => {
       style={{
         width: LayoutWidthSize,
         position: "relative",
-        marginLeft: LayoutWidthSize / 2,
+        marginLeft: (LayoutWidthSize) / 2 ,
         marginTop: "10rem",
       }}
       cols={columns}
@@ -120,10 +135,11 @@ export const GridComponent = () => {
       onDrop={handleOnDrop}
       width={LayoutWidthSize}
       isDraggable={!isDragDrop}
-      onDrag={handleDrag}
+      onDragStart={hundleDragStart}
+      // onDrag={handleDrag}
       onDragStop={handleDragStop}
       isDroppable
-      preventCollision
+      preventCollision={isFixed}
     // allowOverlap
     // isBounded
     >

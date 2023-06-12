@@ -20,9 +20,16 @@ export const data = [
   { id: 15, position: null, name: "new contents" },
 ]
 
+export interface ItoolBox{
+  width: number, height: number, top: number, left:number 
+}
+
 interface IToolBoxContext {
   isOpened: boolean,
   setisOpened: React.Dispatch<React.SetStateAction<boolean>>
+
+  toolBoxValues: ItoolBox,
+  setToolBoxValues: React.Dispatch<React.SetStateAction<ItoolBox>>
 
   isFixed: boolean,
   setIsFixed: React.Dispatch<React.SetStateAction<boolean>>
@@ -44,6 +51,9 @@ const ToolBoxContext = createContext<IToolBoxContext>({} as IToolBoxContext)
 
 export const ToolBoxContextProvider = (props: React.PropsWithChildren) => {
   const [isOpened, setisOpened] = useState(false)
+  const [toolBoxValues, setToolBoxValues] = useState<ItoolBox>({
+    width: 0, height: 0, top: 0, left: 0
+  })
   const [isFixed, setIsFixed] = useState(false)
   const [currentElementId, setCurrentElementId] = useState(0)
   const [currentData, setCurrentData] = useState(data)
@@ -51,16 +61,10 @@ export const ToolBoxContextProvider = (props: React.PropsWithChildren) => {
   const [layoutContents, setLayoutContents] = useState(generateLayout(currentData))
   const [layoutNullContents,setLayoutNullContents] = useState(generateLayout(currentData))
 
-  useEffect(() =>{
-    setLayoutContents(generateLayout(currentData))
-    setLayoutNullContents(generateNullLayout(currentData))
-  } , [currentData])
-   
-
-
   return (
     <ToolBoxContext.Provider value={{
       isOpened, setisOpened,
+      toolBoxValues, setToolBoxValues,
       isFixed, setIsFixed,
       currentElementId, setCurrentElementId,
       currentData, setCurrentData,

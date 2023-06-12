@@ -1,6 +1,6 @@
 import GridLayout, { ItemCallback, Layout } from "react-grid-layout";
 import { contentsLayout, data, generateLayout, generateNullLayout, getContents, layout } from './data'
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useToolBoxContext } from "./ToolBoxContext";
 
 
@@ -11,9 +11,12 @@ export const GridComponent = () => {
   }>()
 
   const {
+    isOpened,
+    toolBoxValues, setToolBoxValues,
     setCurrentElementId, currentElementId, 
     currentData, setCurrentData, 
-    layoutContents, setLayoutContents, setLayoutNullContents,
+    layoutContents, setLayoutContents,
+    setLayoutNullContents, layoutNullContents,
     isFixed 
   } = useToolBoxContext()
 
@@ -36,27 +39,38 @@ export const GridComponent = () => {
     event: MouseEvent,
     element: HTMLElement
   ) => {
+    return
 
     if (newItem) {
       setPlaceholderPosition({
         x: newItem.x, y: newItem.y
       })
     }
-    return
-    const filteredArray: Layout[] = []
-    let fixedArray = layoutContents
-    layoutContents.forEach((object1) => {
-      const newItem = layout.filter(object2 => {
-        return object1.i === object2.i && ((object1.x !== object2.x) || (object1.y !== object2.y)) && (placeholder.x === object2.x || placeholder.y === object2.y)
-      })
-      if (newItem[0]) {
-        filteredArray.push(newItem[0])
-        // const indexFixed = filteredArray.findIndex((item)=> item.i === newItem[0].i) 
-        // if(indexFixed > -1 ) fixedArray.splice(indexFixed, 1)
-      }
-    });
 
-    // console.log("newLayout", ())
+    if( 
+      (event.clientX < (toolBoxValues.left+toolBoxValues.width) && (event.clientX > (toolBoxValues.left))) 
+      &&
+      (event.clientY < (toolBoxValues.top+toolBoxValues.height) && (event.clientY > (toolBoxValues.top)))
+    ){
+      // console.log("inside");
+    }
+
+    // console.log("event", event);
+
+    // const filteredArray: Layout[] = []
+    // let fixedArray = layoutContents
+    // layoutContents.forEach((object1) => {
+    //   const newItem = layout.filter(object2 => {
+    //     return object1.i === object2.i && ((object1.x !== object2.x) || (object1.y !== object2.y)) && (placeholder.x === object2.x || placeholder.y === object2.y)
+    //   })
+    //   if (newItem[0]) {
+    //     filteredArray.push(newItem[0])
+    //     // const indexFixed = filteredArray.findIndex((item)=> item.i === newItem[0].i) 
+    //     // if(indexFixed > -1 ) fixedArray.splice(indexFixed, 1)
+    //   }
+    // });
+
+    // // console.log("newLayout", ())
   };
 
 
@@ -79,12 +93,16 @@ export const GridComponent = () => {
   }
 
   const handleOnDrop = (layout: Layout[], item: Layout, _e: Event) => {
+    updateDataCurrentContents(layout, item)
+  }
+
+  function updateDataCurrentContents(layout: Layout[], item: Layout){
     const newData = currentData
     const index = newData.findIndex(i => i.id === currentElementId)
     if (index !== -1) {
       newData[index].position = `${item.x}-${item.y}`
     }
-    console.log("get dif", getDifference(layoutContents, layout))
+    //console.log("get dif", getDifference(layoutContents, layout))
 
     getDifference(layoutContents, layout).forEach((itemChanged) => {
       const index = newData.findIndex(i => i.id.toString() === itemChanged.i)
@@ -99,7 +117,7 @@ export const GridComponent = () => {
     setLayoutNullContents(generateNullLayout(currentData))
     setCurrentElementId(-1)
   }
-
+  
   const [isDragDrop, setIsDragDrop] = useState(false)
   const bodyWidth = window.document.body.offsetWidth
   const LayoutWidthSize = bodyWidth < 900 ? bodyWidth : bodyWidth / 2
@@ -113,15 +131,34 @@ export const GridComponent = () => {
     element: HTMLElement
   ) => {
     element.style.zIndex = "1"
-    console.log("element", element);
-    console.log("event", event);
+    if(!isOpened) return
     
-  }
+    if(
+      (event.clientX < (toolBoxValues.left+toolBoxValues.width) && (event.clientX > (toolBoxValues.left))) 
+      &&
+      (event.clientY < (toolBoxValues.top+toolBoxValues.height) && (event.clientY > (toolBoxValues.top)))
+      ){
+        const newData = currentData
+        const index = newData.findIndex(i => i.id === Number(_newItem.i))
+        newData[index] = {
+          ...newData[index], position: null
+        }
+        setCurrentData(newData)
+        setLayoutContents(generateLayout(currentData))
+        setLayoutNullContents(generateNullLayout(currentData))
+      } else updateDataCurrentContents(_layout, _newItem)
+    }
+    const gridRef = useRef<React.LegacyRef<ReactGridLayout>>()
 
+  useEffect(()=>{
+    if(!gridRef) return
+    console.log("gridRef", gridRef)
+  },[gridRef])
 
   return (
     <GridLayout
       layout={layoutContents}
+      ref={gridRef as React.LegacyRef<ReactGridLayout>}
       style={{
         width: LayoutWidthSize,
         position: "relative",
@@ -132,6 +169,7 @@ export const GridComponent = () => {
       // compactType={"vertical"}
       compactType={null}
       autoSize
+      onDrag={handleDrag}
       onDrop={handleOnDrop}
       width={LayoutWidthSize}
       isDraggable={!isDragDrop}
@@ -150,7 +188,7 @@ export const GridComponent = () => {
           key={item.id.toString()}
           onDrag={() => setCurrentElementId(item.id)}
         >
-          {item.name}
+          {item.name} {}
         </div>
       ))}
     </GridLayout>
